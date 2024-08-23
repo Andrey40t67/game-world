@@ -1,0 +1,207 @@
+# game-world<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игровой Мир</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            width: 90%;
+            max-width: 900px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        .menu-item {
+            width: 200px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .menu-item:hover {
+            background-color: #bdc3c7;
+        }
+        .menu-item h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+        .game-container {
+            display: none;
+            text-align: left;
+        }
+        .chat-container {
+            display: none;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .chat-input {
+            display: flex;
+            margin-top: 10px;
+            justify-content: space-between;
+        }
+        .chat-input button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .chat-input button:hover {
+            background-color: #2980b9;
+        }
+        .emoji {
+            font-size: 2em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Игровой Мир</h1>
+        <div class="menu">
+            <div class="menu-item" onclick="startGame(0)">
+                <h2>Нулевая игра</h2>
+            </div>
+            <!-- Создай элементы для других 29 игр -->
+            <div class="menu-item" onclick="startGame(1)">
+                <h2>Игра 1</h2>
+            </div>
+            <div class="menu-item" onclick="startGame(2)">
+                <h2>Игра 2</h2>
+            </div>
+            <!-- Добавь элементы для других игр по аналогии -->
+        </div>
+
+        <!-- Нулевая игра (чат) -->
+        <div class="chat-container" id="game-0">
+            <div class="chat-message" id="chat-log"></div>
+            <div class="chat-input">
+                <button onclick="chooseOption(0)"><span class="emoji">💬</span> Ответить: "Я уже иду"</button>
+                <button onclick="chooseOption(1)"><span class="emoji">⌛</span> Ответить: "Буду через час"</button>
+            </div>
+        </div>
+
+        <!-- Placeholder для других игр -->
+        <div class="game-container" id="game-1">
+            <h2>Игра 1</h2>
+            <!-- Здесь добавь контент для первой игры -->
+        </div>
+        <div class="game-container" id="game-2">
+            <h2>Игра 2</h2>
+            <!-- Здесь добавь контент для второй игры -->
+        </div>
+        <!-- Добавь контейнеры для остальных игр по аналогии -->
+    </div>
+
+    <script>
+        const story = [
+            { 
+                message: "Жина: Когда будешь дома? 😊", 
+                options: [
+                    { text: "Я уже иду", response: "Жина: Отлично, жду тебя! 🚗", next: 1 },
+                    { text: "Буду через час", response: "Жина: Ну ладно... 😐", next: 1 }
+                ] 
+            },
+            { 
+                message: "Жина: Не забудь купить хлеба! 🍞", 
+                options: [
+                    { text: "Конечно, куплю!", response: "Жина: Ты лучший! 😍", next: 2 },
+                    { text: "Сейчас, только закончу свои дела", response: "Жина: Надеюсь, не забудешь... 😒", next: 2 }
+                ] 
+            },
+            {
+                message: "Жина: Ты взял зонт? 🌧️", 
+                options: [
+                    { text: "Да, взял", response: "Жина: Отлично! ☔", next: null },
+                    { text: "Нет, я в машине", response: "Жина: Тогда не забудь его, когда выйдешь! 🚗", next: null }
+                ]
+            }
+        ];
+
+        let currentStep = 0;
+
+        function startGame(gameIndex) {
+            // Скрыть все игры
+            const allGames = document.querySelectorAll('.game-container, .chat-container');
+            allGames.forEach(game => game.style.display = 'none');
+
+            // Показать выбранную игру
+            document.getElementById(`game-${gameIndex}`).style.display = 'block';
+
+            if (gameIndex === 0) {
+                startChat();
+            }
+        }
+
+        function startChat() {
+            const chatLog = document.getElementById('chat-log');
+            chatLog.textContent = story[currentStep].message;
+            updateOptions();
+        }
+
+        function updateOptions() {
+            const buttons = document.querySelectorAll('.chat-input button');
+            story[currentStep].options.forEach((option, index) => {
+                buttons[index].textContent = option.text;
+                buttons[index].onclick = () => chooseOption(index);
+            });
+        }
+
+        function chooseOption(optionIndex) {
+            const chatLog = document.getElementById('chat-log');
+            chatLog.textContent += `\n\nТы: ${story[currentStep].options[optionIndex].text}`;
+            chatLog.textContent += `\n${story[currentStep].options[optionIndex].response}`;
+
+            currentStep = story[currentStep].options[optionIndex].next;
+
+            if (currentStep !== null) {
+                setTimeout(() => {
+                    chatLog.textContent += `\n\n${story[currentStep].message}`;
+                    updateOptions();
+                }, 1000);
+            } else {
+                const buttons = document.querySelectorAll('.chat-input button');
+                buttons.forEach(button => button.style.display = 'none');
+                chatLog.textContent += "\n\nКонец истории!";
+            }
+        }
+    </script>
+</body>
+</html>
